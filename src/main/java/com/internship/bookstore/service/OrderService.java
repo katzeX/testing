@@ -6,7 +6,9 @@ import com.internship.bookstore.model.Book;
 import com.internship.bookstore.model.BookOrder;
 import com.internship.bookstore.repository.BookRepository;
 import com.internship.bookstore.repository.OrderRepository;
-import com.internship.bookstore.utils.exceptions.RecordNotFoundException;
+import com.internship.bookstore.utils.exceptions.BookStoreException;
+import com.internship.bookstore.utils.exceptions.ExceptionType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,8 +27,6 @@ public class OrderService {
     private final BookRepository bookRepository;
     private final UserService userService;
     private final VoucherService voucherService;
-    @Value("${message.book.not-found}")
-    private String messageBookNotFound;
 
     @Transactional
     public OrderResponseDto save(OrderRequestDto orderRequestDto) {
@@ -34,7 +34,7 @@ public class OrderService {
 
         Book book = bookRepository.findBookById(orderRequestDto.getBookId()).orElseThrow(() -> {
             log.warn("Book with id [{}] was not found in the database", orderRequestDto.getBookId());
-            return new RecordNotFoundException(format(messageBookNotFound, orderRequestDto.getBookId()));
+            return BookStoreException.of(ExceptionType.BOOK_NOT_FOUND, orderRequestDto.getBookId());
         });
 
         Double voucherPrice = voucherService.apply(orderRequestDto.getVoucherTitle());

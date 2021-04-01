@@ -6,7 +6,8 @@ import com.internship.bookstore.model.Author;
 import com.internship.bookstore.model.Book;
 import com.internship.bookstore.repository.AuthorRepository;
 import com.internship.bookstore.repository.BookRepository;
-import com.internship.bookstore.utils.exceptions.RecordNotFoundException;
+import com.internship.bookstore.utils.exceptions.BookStoreException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.internship.bookstore.utils.exceptions.ExceptionType.AUTHOR_NOT_FOUND;
 import static com.internship.bookstore.utils.mappers.BookMapper.mapBookRequestDtoToBook;
 import static com.internship.bookstore.utils.mappers.BookMapper.mapBookToBookResponseDto;
 import static java.lang.String.format;
@@ -27,10 +29,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
-    @Value("${message.book.not-found}")
-    private String messageBookNotFound;
-    @Value("${message.author.not-found}")
-    private String messageAuthorNotFound;
+
 
     @Transactional(readOnly = true)
     public List<BookResponseDto> getAllBooks() {
@@ -48,8 +47,7 @@ public class BookService {
         Author author = authorRepository.findById(bookRequestDto.getAuthorId()).orElseThrow(
                 () -> { log.warn("Author with id [{}] was not found in database",
                             bookRequestDto.getAuthorId());
-                    return new RecordNotFoundException(
-                            format(messageAuthorNotFound, bookRequestDto.getAuthorId()));
+                    return BookStoreException.of(AUTHOR_NOT_FOUND, bookRequestDto.getAuthorId());
                 });
 
         Book book = mapBookRequestDtoToBook.apply(bookRequestDto);

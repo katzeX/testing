@@ -36,7 +36,7 @@ public class ExceptionsHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({
-            RecordNotFoundException.class,
+            BookStoreException.class,
             ValidationException.class,
             MethodArgumentTypeMismatchException.class
     })

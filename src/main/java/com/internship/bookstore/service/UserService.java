@@ -3,6 +3,8 @@ package com.internship.bookstore.service;
 
 import com.internship.bookstore.model.User;
 import com.internship.bookstore.repository.UserRepository;
+import com.internship.bookstore.utils.exceptions.BookStoreException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
+import static com.internship.bookstore.utils.exceptions.ExceptionType.USER_NOT_FOUND;
 import static java.lang.String.format;
 
 @Service
@@ -25,15 +28,12 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    @Value("${message.user.not-found}")
-    private String messageUserNotFound;
-
     @Override
     public UserDetails loadUserByUsername(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> {
                     log.warn("User with email [{}] was not found in the database", email);
-                    return new UsernameNotFoundException(format(messageUserNotFound, email));
+                    return BookStoreException.of(USER_NOT_FOUND, email);
                 }
         );
 
@@ -55,7 +55,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(email).orElseThrow(
                 () -> {
                     log.warn("User with email [{}] was not found in the database", email);
-                    return new UsernameNotFoundException(format(messageUserNotFound, email));
+                    return BookStoreException.of(USER_NOT_FOUND, email);
                 }
         );
     }

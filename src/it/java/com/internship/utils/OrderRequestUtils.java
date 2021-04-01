@@ -1,10 +1,11 @@
-package com.internship.it.utils;
+package com.internship.utils;
 
 import com.internship.bookstore.api.dto.OrderRequestDto;
 import com.internship.bookstore.api.dto.OrderResponseDto;
-import lombok.NoArgsConstructor;
 
 import java.util.function.Supplier;
+
+import lombok.NoArgsConstructor;
 
 import static com.internship.TestConstants.BOOK_TITLE_ONE;
 import static com.internship.TestConstants.ID_ONE;

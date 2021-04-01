@@ -1,8 +1,9 @@
-package com.internship.it.jpa;
+package com.internship.jpa;
 
 import com.internship.bookstore.model.Book;
 import com.internship.bookstore.repository.AuthorRepository;
 import com.internship.bookstore.repository.BookRepository;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
