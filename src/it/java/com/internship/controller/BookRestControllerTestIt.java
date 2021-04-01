@@ -1,11 +1,10 @@
-package com.internship.it.controller;
+package com.internship.controller;
 
 import com.internship.bookstore.api.dto.BookResponseDto;
 import com.internship.bookstore.api.exchange.Response;
-import com.internship.bookstore.repository.AuthorRepository;
-import com.internship.bookstore.repository.BookRepository;
-import com.internship.bookstore.repository.UserRepository;
-import org.junit.jupiter.api.AfterEach;
+import com.internship.itconfig.Prerequisites;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +16,12 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.net.URI;
 import java.util.List;
+
+import lombok.val;
 
 import static com.internship.TestConstants.AUTH_USER_EMAIL;
 import static com.internship.TestConstants.AUTH_USER_PASSWORD;
@@ -33,11 +31,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
-@TestPropertySource("classpath:exceptions-test.properties")
-@ActiveProfiles("test")
+@ActiveProfiles("it")
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@Sql(scripts = "/db/test-data.sql", executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
+//@Sql(scripts = "/db/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD) just for example
 public class BookRestControllerTestIt {
 
     @LocalServerPort
@@ -47,33 +44,35 @@ public class BookRestControllerTestIt {
     private TestRestTemplate testRestTemplate;
 
     @Autowired
-    private BookRepository bookRepository;
+    private Prerequisites prerequisites;
 
-    @Autowired
-    private AuthorRepository authorRepository;
 
-    @Autowired
-    private UserRepository userRepository;
+    @BeforeEach
+    void setUp() {
+        prerequisites.clear();
 
-    @AfterEach
-    void tearDown() {
-        bookRepository.deleteAll();
-        authorRepository.deleteAll();
-        userRepository.deleteAll();
+        val author = prerequisites.createAuthor();
+        prerequisites.createUser();
+        prerequisites.createBooks(author);
+        prerequisites.createVoucher();
     }
 
     @Test
     public void shouldReturnAllBooks() throws Exception {
         ResponseEntity<Response<List<BookResponseDto>>> response = testRestTemplate
-                .withBasicAuth(AUTH_USER_EMAIL, AUTH_USER_PASSWORD)
-                .exchange(new URI(createURLWithPort("/books", port)),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<Response<List<BookResponseDto>>>() {
-                        });
+            .withBasicAuth(AUTH_USER_EMAIL, AUTH_USER_PASSWORD)
+            .exchange(
+                new URI(createURLWithPort("/books", port)),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Response<List<BookResponseDto>>>() {
+                }
+            );
 
         assertNotNull(response.getBody());
-        assertEquals(BOOK_RESPONSE_DTO_ONE.get().getTitle(),
-                response.getBody().getData().get(0).getTitle());
+        assertEquals(
+            BOOK_RESPONSE_DTO_ONE.get().getTitle(),
+            response.getBody().getData().get(0).getTitle()
+        );
     }
 }

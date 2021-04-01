@@ -3,7 +3,6 @@ package com.internship.bookstore.controller;
 import com.internship.bookstore.api.controller.BookRestController;
 import com.internship.bookstore.service.BookService;
 import com.internship.bookstore.service.UserService;
-import com.internship.it.controller.BaseController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

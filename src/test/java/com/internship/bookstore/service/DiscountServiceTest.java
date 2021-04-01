@@ -4,7 +4,8 @@ import com.internship.bookstore.api.dto.DiscountResponseDto;
 import com.internship.bookstore.model.Discount;
 import com.internship.bookstore.repository.BookRepository;
 import com.internship.bookstore.repository.DiscountRepository;
-import com.internship.bookstore.utils.exceptions.RecordNotFoundException;
+import com.internship.bookstore.utils.exceptions.BookStoreException;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
+import lombok.val;
+
+import static com.internship.TestConstants.BOOK_WITH_ID_NOT_FOUND;
 import static com.internship.TestConstants.ID_ONE;
 import static com.internship.bookstore.utils.BookTestUtils.BOOK_ONE;
 import static com.internship.bookstore.utils.DiscountTestUtils.DISCOUNT_ONE;
@@ -41,12 +45,6 @@ public class DiscountServiceTest {
 
     @InjectMocks
     private DiscountService discountService;
-
-    @BeforeEach
-    void setUp() {
-        ReflectionTestUtils.setField(discountService, "messageBookNotFound",
-                "Book with id %s was not found");
-    }
 
     @AfterEach
     void tearDown() {
@@ -75,8 +73,10 @@ public class DiscountServiceTest {
     }
 
     @Test
-    public void shouldThrowRecordNotFoundException() {
+    public void shouldThrowBookNotFoundException() {
         when(bookRepository.findBookById(ID_ONE)).thenReturn(Optional.empty());
-        assertThrows(RecordNotFoundException.class, () -> discountService.save(DISCOUNT_REQUEST_DTO));
+
+        val actual = assertThrows(BookStoreException.class, () -> discountService.save(DISCOUNT_REQUEST_DTO));
+        assertEquals(BOOK_WITH_ID_NOT_FOUND, actual.getMessage());
     }
 }

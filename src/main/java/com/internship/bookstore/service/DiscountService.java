@@ -6,7 +6,9 @@ import com.internship.bookstore.model.Book;
 import com.internship.bookstore.model.Discount;
 import com.internship.bookstore.repository.BookRepository;
 import com.internship.bookstore.repository.DiscountRepository;
-import com.internship.bookstore.utils.exceptions.RecordNotFoundException;
+import com.internship.bookstore.utils.exceptions.BookStoreException;
+import com.internship.bookstore.utils.exceptions.ExceptionType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +26,7 @@ public class DiscountService {
 
     private final BookRepository bookRepository;
     private final DiscountRepository discountRepository;
-    @Value("${message.book.not-found}")
-    private String messageBookNotFound;
+
 
     private double calculateDiscount(double discountPercentage, double price) {
         return price - ((discountPercentage * price) / 100);
@@ -37,7 +38,7 @@ public class DiscountService {
 
         Book book = bookRepository.findBookById(discountRequestDto.getBookId()).orElseThrow(() -> {
             log.warn("Book with id [{}] was not found in the database", discountRequestDto.getBookId());
-            return new RecordNotFoundException(format(messageBookNotFound, discountRequestDto.getBookId()));
+            return BookStoreException.of(ExceptionType.BOOK_NOT_FOUND, discountRequestDto.getBookId());
         });
 
         Discount discount = mapDiscountRequestDtoToDiscount.apply(discountRequestDto);
